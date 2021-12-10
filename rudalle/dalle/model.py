@@ -117,7 +117,7 @@ class DalleModel(torch.nn.Module):
             self,
             input_ids,
             attention_mask,
-            sample_weights,
+            sample_weights=None,
             return_loss=False,
             has_cache=False,
             use_cache=False,
@@ -167,7 +167,10 @@ class DalleModel(torch.nn.Module):
         loss_img = F.cross_entropy(
             image_logits,
             labels[:, self.text_seq_length:], reduction="none").mean(dim=1)
-                        
+        
+        if sample_weights is None:
+            sample_weights = torch.ones((loss_text.shape[0],))*1.0
+        
         sample_weights = sample_weights.to(self.device)
         
         loss_text *= sample_weights
